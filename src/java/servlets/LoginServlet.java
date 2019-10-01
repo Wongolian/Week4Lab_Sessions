@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import models.AccountService;
 
 /**
  *
@@ -19,9 +20,15 @@ import javax.servlet.http.HttpSession;
  */
 public class LoginServlet extends HttpServlet {
 
+    AccountService as = new AccountService();
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        HttpSession session = request.getSession();
+
+        String username = (String) session.getAttribute("username");
 
         getServletContext().getRequestDispatcher("/WEB-INF/Login.jsp").forward(request, response);
 
@@ -32,27 +39,25 @@ public class LoginServlet extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession();
-//        request.setAttribute("success", null);
 
         String username = request.getParameter("username");
         String password = request.getParameter("password");
 
-        if (username.equals("") || username == null || password.equals("") || password == null) {
-            request.setAttribute("required", "All fields are required, please try again");
+        if (username.equals("") || password.equals("")) {
+            request.setAttribute("required", "All fields are required, please try again!");
 
             getServletContext().getRequestDispatcher("/WEB-INF/Login.jsp").forward(request, response);
             return;
         }
 
+        if (as.login(username, password) == null) {
+            request.setAttribute("invalid", "Invalid Login, please try again.");
+            getServletContext().getRequestDispatcher("/WEB-INF/Login.jsp").forward(request, response);
+            return;
+        }
         session.setAttribute("username", username);
 
-        getServletContext().getRequestDispatcher("/WEB-INF/home.jsp")
-                .forward(request, response);
+        getServletContext().getRequestDispatcher("/WEB-INF/Home.jsp").forward(request, response);
     }
-
-    @Override
-    public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
 
 }
